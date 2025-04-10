@@ -269,7 +269,7 @@ const Board = () => {
     }
 
     return (
-        <div className='flex flex-col'>
+        <div className='flex flex-col w-full max-w-[75%] min-h-screen overflow-x-hidden px-2 py-4'>
             <h1 className='self-center m-2 p-2 text-4xl'>Sudoku Solver</h1>
             {
                 boardText.map((row, rowIndex) => (
