@@ -10,10 +10,20 @@ interface ButtonsProps {
 const Buttons = ({solveWithSteps,solveInstantly,generateRandom,clearBoard}:ButtonsProps) => {
     return (
         <div className="flex justify-center items-center w-full">
-            <button onClick={solveWithSteps} className='p-4 m-4 text-xs sm:text-xl sm:px-3 sm:py-2 border cursor-pointer'>Show Steps</button>
-            <button onClick={solveInstantly} className='p-4 m-4 text-xs sm:text-xl sm:px-3 sm:py-2 border cursor-pointer'>Solve Instantly</button>
-            <button onClick={generateRandom} className='p-4 m-4 text-xs sm:text-xl sm:px-3 sm:py-2 border cursor-pointer'>Generate random puzzle</button>
-            <button onClick={clearBoard} className='p-4 m-4 text-xs sm:text-xl sm:px-3 sm:py-2 border cursor-pointer'>Clear Board</button>
+            {[
+                { label: 'Show Steps', action: solveWithSteps },
+                { label: 'Solve Instantly', action: solveInstantly },
+                { label: 'Random Puzzle', action: generateRandom }, // Shortened label for consistency
+                { label: 'Clear', action: clearBoard },
+            ].map(({ label, action }, idx) => (
+                <button
+                key={idx}
+                onClick={action}
+                className="w-1/4 h-10 text-[10px] sm:text-[15px] border rounded m-2 p-2 flex items-center justify-center"
+                >
+                {label}
+                </button>
+            ))}
         </div>
     )
 }
