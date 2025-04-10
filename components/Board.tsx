@@ -65,6 +65,7 @@ const Board = () => {
             for(let j=0;j<9;j++){
                 if(board[i][j] == "") continue;
                 if(rowMap.get(board[i][j])){
+                    console.log(i,j)
                     return false;
                 } 
                 rowMap.set(board[i][j],true);
@@ -87,11 +88,12 @@ const Board = () => {
                 const gridMap = new Map<string, boolean>();
                 for(let x = i*3;x<i*3+3;x++){
                     for(let y=j*3;y<j*3+3;y++){
-                        if(board[i][j] == "") continue;
-                        if(gridMap.get(board[x][j])){
+                        if(board[x][y] == "") continue;
+                        if(gridMap.get(board[x][y])){
+                            console.log(i,j);
                             return false;
                         }
-                        gridMap.set(board[x][j],true);
+                        gridMap.set(board[x][y],true);
                     }
                 }
             }
