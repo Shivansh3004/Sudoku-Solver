@@ -4,9 +4,10 @@ import React, { useState } from 'react'
 import Tile from './Tile';
 import "../functions/solver"
 import Buttons from './Buttons';
+import NumberPad from './NumberPad';
 
 const Board = () => {
-
+    const [tileFocused, setTileFocused] = useState<[number,number]| null>(null);
     const [boardText,setBoardText] = useState(()=>{
         const tempBoard = [];
         for (let i = 0; i < 9; i++) {
@@ -103,6 +104,7 @@ const Board = () => {
 
 //solve sudoku using backtracking
     const solveWithSteps = async() => {
+        setTileFocused(null);
         if(!checkInitial()){
             alert("Invalid initial board");
             return;
@@ -114,6 +116,7 @@ const Board = () => {
 
 
     const solveInstantly = () => {
+        setTileFocused(null);
         if(!checkInitial()){
             alert("Invalid initial board");
             return;
@@ -188,6 +191,16 @@ const Board = () => {
         return true;
     };
 
+    const handleNumberPadClick = (val: string) => {
+        if (!tileFocused) return;
+        const [row, col] = tileFocused;
+        setBoardText(prev => {
+            const newBoard = prev.map(r => [...r]);
+            newBoard[row][col] = val;
+            return newBoard;
+        });
+    };
+
     const helper = async(currRow:number,currCol:number)=>{
         if(currRow == 9) {
             flag = true;
@@ -218,12 +231,13 @@ const Board = () => {
                 boardText.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex">
                         {row.map((cell, cellIndex) => (
-                            <Tile key={rowIndex*9+cellIndex} handleKeyDown={(event)=>handleKeyDown(event,rowIndex,cellIndex)} tileText = {boardText[rowIndex][cellIndex]}/>
+                            <Tile key={rowIndex*9+cellIndex} handleKeyDown={(event)=>handleKeyDown(event,rowIndex,cellIndex)} tileText = {boardText[rowIndex][cellIndex]} setTileFocused={()=>setTileFocused([rowIndex,cellIndex])} isFocused={tileFocused?.[0] === rowIndex && tileFocused?.[1] === cellIndex}/>
                         ))}
                     </div>
                 ))
             }
             <Buttons solveWithSteps={solveWithSteps} solveInstantly={solveInstantly}/>
+            <NumberPad onNumberClick={handleNumberPadClick} />
         </div>
     )
 }
