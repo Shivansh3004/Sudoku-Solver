@@ -8,6 +8,7 @@ import NumberPad from './NumberPad';
 
 const Board = () => {
     const [tileFocused, setTileFocused] = useState<[number,number]| null>(null);
+    const [tileBeingSolved, setTileBeingSolved] = useState<[number,number]| null>(null);
     const [boardText,setBoardText] = useState(()=>{
         const tempBoard = [];
         for (let i = 0; i < 9; i++) {
@@ -23,7 +24,9 @@ const Board = () => {
     const board = boardText.map(row=>[...row]);
 
 
-    const handleKeyDown = (event: React.KeyboardEvent,rowIndex:number,cellIndex:number) => {
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if(!tileFocused) return;
+        const [rowIndex, cellIndex] = tileFocused;
         const key = event.key;
         const ascii = key.charCodeAt(0);
         if(key.length!=1){
@@ -59,7 +62,6 @@ const Board = () => {
     }
 
     const checkInitial = () => {
-        
         //check each row
         for(let i=0;i<9;i++){
             const rowMap = new Map<string, boolean>();
@@ -102,20 +104,23 @@ const Board = () => {
         return true;
     }
 
+    let flag = false;
+
+
 //solve sudoku using backtracking
     const solveWithSteps = async() => {
+        flag = false;
         setTileFocused(null);
         if(!checkInitial()){
             alert("Invalid initial board");
             return;
         }
         await helper(0,0);
+        setTileBeingSolved(null);
     }
 
-    let flag = false;
-
-
     const solveInstantly = () => {
+        flag = false;
         setTileFocused(null);
         if(!checkInitial()){
             alert("Invalid initial board");
@@ -202,6 +207,7 @@ const Board = () => {
     };
 
     const helper = async(currRow:number,currCol:number)=>{
+        setTileBeingSolved([currRow,currCol]);
         if(currRow == 9) {
             flag = true;
             return;
@@ -225,19 +231,57 @@ const Board = () => {
         }
     }
 
+    const handleFocusedTile = (rowIndex:number,cellIndex:number) => {
+        if(tileFocused?.[0] === rowIndex && tileFocused?.[1] === cellIndex){
+            setTileFocused(null);
+            return;
+        }
+        setTileFocused([rowIndex,cellIndex]);
+    }
+
+    const clearBoard = () => {
+        board.forEach((row, rowIndex) => {
+            row.forEach((cell, cellIndex) => {
+                board[rowIndex][cellIndex] = "";
+            });
+        })
+        flag = false;
+        setBoardText(board);
+    }
+
+    const generateRandom = async () => {
+        board.forEach((row, rowIndex) => {
+            row.forEach((cell, cellIndex) => {
+                board[rowIndex][cellIndex] = "";
+            });
+        })
+        const data = await fetch("https://sudoku-api.vercel.app/api/dosuku?query={newboard(limit:1){grids{value}}}");
+        const json = await data.json();
+        const grid = json.newboard.grids[0].value;
+        for(let i=0;i<9;i++){
+            for(let j=0;j<9;j++){
+                if(grid[i][j] == 0) continue;
+                board[i][j] = (grid[i][j]).toString();
+            }
+        }
+        flag = false;
+        setBoardText(board);
+    }
+
     return (
-        <div className='bg-white'>
+        <div className='flex flex-col'>
+            <h1 className='self-center m-2 p-2 text-4xl'>Sudoku Solver</h1>
             {
                 boardText.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex">
+                    <div key={rowIndex} className="flex self-center">
                         {row.map((cell, cellIndex) => (
-                            <Tile key={rowIndex*9+cellIndex} handleKeyDown={(event)=>handleKeyDown(event,rowIndex,cellIndex)} tileText = {boardText[rowIndex][cellIndex]} setTileFocused={()=>setTileFocused([rowIndex,cellIndex])} isFocused={tileFocused?.[0] === rowIndex && tileFocused?.[1] === cellIndex}/>
+                            <Tile key={rowIndex*9+cellIndex} handleKeyDown={(event)=>handleKeyDown(event)} tileText = {boardText[rowIndex][cellIndex]} setTileFocused={()=>handleFocusedTile(rowIndex,cellIndex)} isFocused={tileFocused?.[0] === rowIndex && tileFocused?.[1] === cellIndex} isBeingSolved = {tileBeingSolved?.[0]==rowIndex && tileBeingSolved?.[1]==cellIndex} />
                         ))}
                     </div>
                 ))
             }
-            <Buttons solveWithSteps={solveWithSteps} solveInstantly={solveInstantly}/>
-            <NumberPad onNumberClick={handleNumberPadClick} />
+            <Buttons solveWithSteps={solveWithSteps} solveInstantly={solveInstantly} generateRandom={generateRandom} clearBoard={clearBoard} />
+            <NumberPad onNumberClick={(val)=>handleNumberPadClick(val)} />
         </div>
     )
 }

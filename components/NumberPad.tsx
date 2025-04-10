@@ -6,7 +6,7 @@ const NumberPad = ({ onNumberClick }: { onNumberClick: (val: string) => void }) 
             {numbers.map((num, idx) => (
             <button
                 key={idx}
-                className="p-4 bg-blue-200 rounded shadow text-xl"
+                className="p-4 bg-blue-200 rounded shadow text-xl cursor-pointer"
                 onClick={() => onNumberClick(num)}
             >
                 {num === "" ? "X" : num}
